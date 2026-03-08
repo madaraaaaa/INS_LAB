@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMG Gesture Predictor</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; text-align: center; padding: 50px; }
+        .container { background: white; max-width: 500px; margin: 0 auto; padding: 40px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { color: #333; }
+        .btn { background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 20px; }
+        .btn:hover { background-color: #0056b3; }
+        input[type="file"] { margin: 20px 0; }
+        
+        .result-box { margin-top: 30px; padding: 20px; background-color: #e7f3fe; border-left: 6px solid #2196F3; display: inline-block; }
+        .result-text { font-size: 24px; font-weight: bold; color: #0d47a1; }
+        .error { color: red; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🖐️ EMG Gesture AI</h1>
+        <p>Upload your <b>.mat</b> file to see the prediction.</p>
+        
+        <form action="/predict" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".mat" required>
+            <br>
+            <button type="submit" class="btn">Analyze Gesture</button>
+        </form>
+
+        {% if result %}
+            <div class="result-box">
+                Predicted Gesture:
+                <div class="result-text">{{ result }}</div>
+            </div>
+        {% endif %}
+
+        {% if error %}
+            <div class="error">
+                <p>⚠️ Error: {{ error }}</p>
+            </div>
+        {% endif %}
+    </div>
+
+</body>
+</html>
