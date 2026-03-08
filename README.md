@@ -1,127 +1,202 @@
 # INS_LAB
 # EMG Gesture Recognition Pipeline
 
-This project implements a complete pipeline for **High-Density sEMG gesture recognition**, including data preprocessing, deep learning training, a web interface for inference, and containerized deployment using Docker.
+This project implements a complete pipeline for **High-Density Surface EMG (sEMG) gesture recognition**, including signal preprocessing, deep learning model training, a web interface for inference, and containerized deployment using Docker.
+
+---
+
+# Project Overview
+
+The system processes **128-channel High-Density EMG signals** to classify **6 different hand gestures** using a Convolutional Neural Network (CNN).
+
+The pipeline includes:
+
+- Signal preprocessing and segmentation
+- CNN-based gesture classification
+- Web interface for gesture prediction
+- Docker-based deployment for reproducibility
 
 ---
 
 # Phase 1: Data Preprocessing & Segmentation
 
 ### Filtering
-The raw **High-Density sEMG data (128 channels)** was cleaned using signal processing techniques:
 
-- **50 Hz Notch Filter** – removes electrical power-line interference.
-- **20–500 Hz Bandpass Filter** – isolates the frequency range corresponding to muscle activity.
+The raw **128-channel sEMG signals** were cleaned using signal processing techniques:
+
+- **50 Hz Notch Filter**  
+  Removes electrical power-line interference.
+
+- **20–500 Hz Bandpass Filter**  
+  Isolates the frequency range corresponding to muscle activity.
 
 ### Silence Removal
-To remove inactive segments:
+
+To remove inactive signal segments:
 
 1. Signals were **rectified** and **averaged**.
-2. A **512-sample smoothing window** was applied to bridge signal zero-crossings.
+2. A **512-sample smoothing window** was applied to bridge zero crossings.
 3. This produced a stable **signal envelope**.
-4. A **dynamic threshold** was applied to detect and remove silent segments.
+4. A **dynamic threshold** was used to remove silent periods.
 
-Only **active gesture signals** were kept for further processing.
+Only segments containing **active gestures** were retained.
 
 ### Windowing
-The continuous active signal was divided into smaller segments:
+
+The continuous signal was divided into smaller windows:
 
 - **Window size:** 250 ms  
-- **Samples per window:** 512
+- **Samples per window:** 512  
 
-This created properly shaped **input tensors** for the neural network.
+These windows form the **input tensors** for the neural network.
 
 ---
 
-# Phase 2: Deep Learning (CNN) Training
+# Phase 2: Deep Learning Model Training
 
 ### Data Splitting
+
 To evaluate real-world generalization:
 
-- **Training & Validation:** Subjects **P1** and **P2**
+- **Training / Validation:** Subjects **P1** and **P2**
 - **Testing:** Subject **P3** (completely unseen during training)
 
-This setup tests the model's ability to generalize across different individuals.
+This setup evaluates **cross-subject generalization**.
 
 ### Model Architecture
+
 A **Convolutional Neural Network (CNN)** was designed with:
 
-- **3 Convolutional Blocks**
+- 3 Convolutional blocks
   - 16 filters
   - 32 filters
   - 64 filters
-- **Max Pooling** layers
+- **MaxPooling layers**
 - **Dropout** for regularization
-- **Dense classification head**
+- **Dense classification layer**
 
-The model predicts **6 different hand gestures** from the 128-channel electrode grid.
+The model predicts **6 hand gestures** from the **128-electrode EMG grid**.
 
 ### Results
-- **Training accuracy:** ~92%
-- **Cross-subject test accuracy:** ~52%
 
-These results demonstrate that deep learning can **automatically learn spatial muscle activation patterns** from high-density EMG signals.
+| Metric | Result |
+|------|------|
+| Training Accuracy | ~92% |
+| Cross-Subject Test Accuracy | ~52% |
+
+These results demonstrate that deep learning can automatically learn **spatial muscle activation patterns** from high-density EMG signals.
 
 ---
 
 # Phase 3: Application Development
 
 ### Inference Pipeline
-A dedicated inference script was implemented to:
 
-- Load the **trained CNN model**
-- Process **new unseen EMG data**
-- Generate gesture predictions
+An inference script loads the **trained CNN model** and processes new EMG recordings.
+
+The pipeline:
+
+1. Load trained model
+2. Preprocess uploaded signal
+3. Generate gesture prediction
 
 ### Web Interface
-A lightweight **web application** was developed:
 
-- Runs on **port 5000**
-- Allows users to **upload `.mat` EMG files**
-- Displays the **predicted gesture instantly**
+A lightweight web application allows users to interact with the model.
 
-This enables easy interaction with the trained model directly from a browser.
+Features:
+
+- Upload raw **`.mat` EMG files**
+- Run model inference
+- Display predicted gesture
+
+Server runs on:
+
+```
+http://localhost:5000
+```
 
 ---
 
 # Phase 4: Containerization & Deployment (Docker)
 
-### Dockerfile
-A **Dockerfile** was created to define the application environment.  
-It bundles:
+### Docker Environment
 
-- Linux OS
-- Python environment
+A **Docker container** packages the entire system including:
+
+- Linux environment
+- Python runtime
 - PyTorch
-- Preprocessing scripts
+- Preprocessing pipeline
 - Web application
-- Trained CNN model weights
+- Trained model
 
-### Building & Tagging
-The Docker image was built locally and tagged as:
+This guarantees **reproducibility across machines**.
 
-```
-madaraa/emg-app:v1
-```
+### Run the Application
 
-### Global Deployment
-The image (~4GB) was pushed to **Docker Hub**, enabling anyone to run the entire system without installing dependencies.
-
-Run the application using:
+Pull and run the Docker container:
 
 ```bash
 docker run -p 5000:5000 madaraa/emg-app:v1
 ```
 
-This command downloads the image and launches the **complete deep learning inference pipeline**.
+Then open:
+
+```
+http://localhost:5000
+```
+
+---
+
+# Model Weights
+
+Due to file size limitations on GitHub, the trained model weights are hosted on Google Drive.
+
+Download the model weights here:
+
+https://drive.google.com/file/d/1mIHyHU0lBXujammZAFpyHZyBqBQdGoEA/view?usp=drive_link
+
+After downloading, place the weights file in the following directory:
+
+```
+models/
+```
+
+Example structure:
+
+```
+project/
+│
+├── models/
+│   └── model.pth
+├── app/
+├── preprocessing/
+├── Dockerfile
+├── requirements.txt
+└── README.md
+```
+
+---
+
+# Tech Stack
+
+- Python
+- PyTorch
+- NumPy
+- SciPy
+- Flask (Web Interface)
+- Docker
 
 ---
 
 # Summary
 
-This project demonstrates a full **end-to-end machine learning pipeline**:
+This project demonstrates a full **end-to-end machine learning system**:
 
 1. **Signal Processing** for EMG data cleaning and segmentation
 2. **Deep Learning** for gesture classification
-3. **Web Application** for user interaction
-4. **Docker Deployment** for reproducible and portable execution
+3. **Web Application** for interactive predictions
+4. **Docker Deployment** for portable and reproducible execution
+
+---
